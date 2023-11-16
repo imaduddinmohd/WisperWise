@@ -13,6 +13,7 @@ const User = connection.models.User;
 const Room = connection.models.Room;
 
 const bcrypt = require("bcrypt");
+const { isatty } = require("tty");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -51,10 +52,14 @@ passport.use(
     User.findOne({ username: username })
       .then((user) => {
         if (!user) return done(null, false);
-        const isValid = bcrypt.compare(password, user.password);
+        bcrypt
+          .compare(password, user.password)
+          .then((isValid) => {
+            if (isValid) return done(null, user);
+            else return done(null, false);
+          })
 
-        if (isValid) return done(null, user);
-        else return done(null, false);
+          .catch((err) => done(err));
       })
       .catch((err) => {
         done(err);

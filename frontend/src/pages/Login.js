@@ -5,6 +5,11 @@ import axios from "axios";
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isError, setIsError] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +19,9 @@ const LoginForm = () => {
           withCredentials: true,
         });
         navigate("/home");
-      } catch (err) {}
+      } catch (err) {
+        setIsLoading(false);
+      }
     };
     checkLoggedIn();
   }, []);
@@ -35,18 +42,27 @@ const LoginForm = () => {
           }
         );
 
+        // setIsLoading(false);
+
         navigate("/home");
       } catch (err) {
-        alert("login failed");
+        setIsError(true);
       }
     };
     handlePostRequest();
   };
 
+  if (isLoading)
+    return (
+      <div>
+        <h2>Loading...</h2>
+      </div>
+    );
+
   return (
     <div style={styles.container}>
       <form style={styles.form} onSubmit={handleLogin}>
-        <h2>Login</h2>
+        <h2 style={{ marginBottom: "25px" }}>Login</h2>
         <label>
           Username:
           <input
@@ -71,6 +87,18 @@ const LoginForm = () => {
         <Link to="/register">
           <h3 style={styles.link}>Register Here</h3>
         </Link>
+
+        <h3
+          style={{
+            color: "red",
+            height: "100px",
+            marginTop: "20px",
+            textAlign: "center",
+            fontWeight: 400,
+          }}
+        >
+          {isError ? " Username or Password Incorrect" : ""}
+        </h3>
       </form>
     </div>
   );

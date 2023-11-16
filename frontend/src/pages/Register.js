@@ -1,13 +1,43 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Joi from "joi";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  const [isError, setIsError] = useState("");
+
+  const registerSchema = Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).required(),
+    password: Joi.string().pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/
+    ),
+    confirmPassword: Joi.string().required(),
+  });
 
   const handleRegister = (e) => {
     e.preventDefault();
-    // Your login logic here
+
+    const { error } = registerSchema.validate({
+      username,
+      password,
+      confirmPassword,
+    });
+
+    if (error) {
+      setIsError(error.details[0].message);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setIsError("password and confirm password not same");
+      return;
+    }
 
     const handlePostRequest = async () => {
       try {
@@ -22,10 +52,11 @@ const RegisterForm = () => {
           }
         );
 
-        console.log("server response:", response.data);
+        navigate("/");
       } catch (err) {
-        console.log(err);
-        alert("User could not be registered");
+        setIsError(
+          "User with given username already exists!! user couldn't be registered"
+        );
       }
     };
 
@@ -35,7 +66,7 @@ const RegisterForm = () => {
   return (
     <div style={styles.container}>
       <form style={styles.form} onSubmit={handleRegister}>
-        <h2>Register</h2>
+        <h2 style={{ marginBottom: "25px" }}>Register</h2>
         <label>
           Username:
           <input
@@ -54,9 +85,32 @@ const RegisterForm = () => {
             style={styles.input}
           />
         </label>
+
+        <label>
+          Confirm Password:
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={styles.input}
+          />
+        </label>
+
         <button type="submit" style={styles.button}>
-          Login
+          Register
         </button>
+        <h3
+          style={{
+            color: "red",
+            marginTop: "20px",
+            textAlign: "center",
+            height: "100px",
+            fontWeight: 400,
+            fontSize: "18px",
+          }}
+        >
+          {isError}
+        </h3>
       </form>
     </div>
   );

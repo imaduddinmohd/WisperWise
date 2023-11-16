@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Chat.css";
 import { Avatar, IconButton } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
@@ -8,7 +8,15 @@ import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import MicIcon from "@mui/icons-material/Mic";
 import Message from "./Message";
 
-function Chat({ messages, user, sendMessage, roomId, roomName, socket }) {
+function Chat({
+  messages,
+  user,
+  sendMessage,
+  roomId,
+  roomName,
+  socket,
+  setActiveRoom,
+}) {
   const [inputMessage, setInputMessage] = useState("");
 
   const [isTyping, setIsTyping] = useState({ typing: false, name: "" });
@@ -33,11 +41,16 @@ function Chat({ messages, user, sendMessage, roomId, roomName, socket }) {
 
   useEffect(() => {
     socket.on("receiveTyping", (data) => {
-      setIsTyping({ typing: true, name: data });
+      setActiveRoom((prevActiveRoom) => {
+        if (data.roomId == prevActiveRoom._id) {
+          setIsTyping({ typing: true, name: data.username });
+          setTimeout(() => {
+            setIsTyping({ typing: false, name: "" });
+          }, 2000);
+        }
 
-      setTimeout(() => {
-        setIsTyping({ typing: false, name: "" });
-      }, 2000);
+        return prevActiveRoom;
+      });
     });
   }, []);
 
@@ -114,7 +127,10 @@ function Chat({ messages, user, sendMessage, roomId, roomName, socket }) {
             type="text"
             value={inputMessage}
             onChange={(e) => {
-              socket.emit("sendTyping", user.username);
+              socket.emit("sendTyping", {
+                username: user.username,
+                roomId: roomId,
+              });
               setInputMessage(e.target.value);
             }}
             placeholder="Type a message"

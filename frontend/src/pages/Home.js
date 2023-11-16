@@ -23,7 +23,7 @@ const Home = () => {
 
   const handleSidebarChatClick = (_id) => {
     const clickedRoom = rooms.find((room) => {
-      return room._id == _id;
+      return room?._id == _id;
     });
 
     setMessages(clickedRoom.messages);
@@ -50,8 +50,6 @@ const Home = () => {
         setUser(u);
         const r = response?.data?.rooms || [];
 
-        // setRooms([..._pick(user, ["rooms"])]);
-
         setRooms(r);
         setMessages(r?.[0]?.messages || []); // messages state here means the messages in the chat that is open
 
@@ -62,11 +60,18 @@ const Home = () => {
         socket.emit("joinRooms", u?.rooms);
 
         socket.on("receiveMessage", (updatedRoom) => {
-          setMessages(updatedRoom.messages);
+          setActiveRoom((prevActiveRoom) => {
+            if (prevActiveRoom._id == updatedRoom._id) {
+              setMessages(updatedRoom.messages);
+            }
+
+            return prevActiveRoom;
+          });
 
           setRooms((prevRooms) => {
             let newRooms = prevRooms.map((r) => {
-              if (r._id == updatedRoom._id) return updatedRoom;
+              if (r?._id == updatedRoom?._id) return updatedRoom;
+
               return r;
             });
 
@@ -95,8 +100,9 @@ const Home = () => {
         messages={messages}
         sendMessage={sendMessage}
         roomId={activeRoom?._id}
+        setActiveRoom={setActiveRoom}
         user={user}
-        roomName={activeRoom.name}
+        roomName={activeRoom?.name}
         socket={socket}
       />
     </div>
