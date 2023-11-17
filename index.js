@@ -11,22 +11,22 @@ const routes = require("./routes");
 const path = require("path");
 const User = connection.models.User;
 const Room = connection.models.Room;
+require("dotenv").config();
 
 const bcrypt = require("bcrypt");
-const { isatty } = require("tty");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-//app.use(express.static(path.join(__dirname, "frontend", "build")));
+app.use(express.static(path.join(__dirname, "frontend", "build")));
 
 const server = http.createServer(app);
 
@@ -37,12 +37,12 @@ const sessionStore = new MongoStore({
 
 app.use(
   session({
-    secret: "mysecret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     store: sessionStore,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );
@@ -82,14 +82,12 @@ app.use(passport.session());
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
 
 io.on("connection", (socket) => {
-  console.log(`User with id:${socket.id} connected`);
-
   socket.on("joinRooms", (rooms) => {
     rooms.forEach((room) => {
       socket.join(room);
@@ -120,9 +118,22 @@ io.on("connection", (socket) => {
   socket.on("sendTyping", (data) => {
     socket.broadcast.emit("receiveTyping", data);
   });
+
+  socket.on("joinNewRoom", (data) => {
+    socket.join(data);
+  });
 });
 
 app.use(routes);
+
+app.get("*", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "/frontend/build/index.html"),
+    function (err) {
+      res.status(500).send(err);
+    }
+  );
+});
 
 const getLocalTime = () => {
   const localDate = new Date();

@@ -16,6 +16,11 @@ router.get("/api/login-success", (req, res) => {
   res.send("Authenticated");
 });
 
+router.get("/api/logout", (req, res) => {
+  req.logout();
+  return res.status(200).send("User Logged Out");
+});
+
 router.get("/api/home", async (req, res) => {
   if (req.isAuthenticated()) {
     try {
@@ -52,7 +57,6 @@ router.post("/api/rooms", async (req, res) => {
           },
         ],
       });
-      console.log(newRoom);
 
       await newRoom.save();
 

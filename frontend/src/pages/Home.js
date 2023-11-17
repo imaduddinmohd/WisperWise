@@ -6,9 +6,7 @@ import Chat from "../components/Chat";
 import io from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 
-import _, { update } from "lodash";
-
-const socket = io.connect("http://localhost:5000");
+const socket = io.connect("/");
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
@@ -42,7 +40,7 @@ const Home = () => {
     async function run() {
       let response;
       try {
-        response = await axios.get("http://localhost:5000/api/home", {
+        response = await axios.get("/api/home", {
           withCredentials: true,
         });
 
@@ -95,6 +93,7 @@ const Home = () => {
         setRooms={setRooms}
         handleSidebarChatClick={handleSidebarChatClick}
         setUser={setUser}
+        socket={socket}
       />
       <Chat
         messages={messages}

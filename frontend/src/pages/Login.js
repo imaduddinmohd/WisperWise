@@ -15,7 +15,7 @@ const LoginForm = () => {
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/login", {
+        const response = await axios.get("/api/login", {
           withCredentials: true,
         });
         navigate("/home");
@@ -32,7 +32,7 @@ const LoginForm = () => {
     const handlePostRequest = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/login",
+          "/api/login",
           {
             username,
             password,
@@ -61,6 +61,18 @@ const LoginForm = () => {
 
   return (
     <div style={styles.container}>
+      <div style={styles.left}>
+        <h1 style={styles.heading}>
+          Welcome to WisperWise: <br /> Where Conversations Unfold
+        </h1>
+
+        <p>
+          Engage in meaningful discussions with WisperWise, the ultimate
+          platform for creating and joining virtual rooms. Whether you're
+          connecting with friends, colleagues, or fellow enthusiasts, WisperWise
+          provides a space where your conversations come to life.
+        </p>
+      </div>
       <form style={styles.form} onSubmit={handleLogin}>
         <h2 style={{ marginBottom: "25px" }}>Login</h2>
         <label>
@@ -91,7 +103,6 @@ const LoginForm = () => {
         <h3
           style={{
             color: "red",
-            height: "100px",
             marginTop: "20px",
             textAlign: "center",
             fontWeight: 400,
@@ -107,9 +118,9 @@ const LoginForm = () => {
 const styles = {
   container: {
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   form: {
     width: "80%",
@@ -139,6 +150,17 @@ const styles = {
     textDecoration: "none",
     fontSize: "18px",
     textAlign: "center",
+    marginTop: "30px",
+  },
+  left: {
+    maxWidth: "800px",
+    marginRight: "50px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "40px",
+  },
+  heading: {
+    color: "#4caf50",
   },
 };
 

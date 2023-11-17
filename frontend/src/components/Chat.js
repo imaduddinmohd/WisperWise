@@ -42,7 +42,7 @@ function Chat({
   useEffect(() => {
     socket.on("receiveTyping", (data) => {
       setActiveRoom((prevActiveRoom) => {
-        if (data.roomId == prevActiveRoom._id) {
+        if (data.roomId == prevActiveRoom?._id) {
           setIsTyping({ typing: true, name: data.username });
           setTimeout(() => {
             setIsTyping({ typing: false, name: "" });

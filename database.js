@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
 
-const connection = mongoose.createConnection(
-  "mongodb://localhost:27017/wisperwise",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+require("dotenv").config();
+
+const connection = mongoose.createConnection(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },

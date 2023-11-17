@@ -42,7 +42,7 @@ const RegisterForm = () => {
     const handlePostRequest = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/register",
+          "/api/register",
           {
             username,
             password,

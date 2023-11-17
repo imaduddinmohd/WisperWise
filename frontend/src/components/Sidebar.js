@@ -16,14 +16,22 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import LoginIcon from "@mui/icons-material/Login";
 import MapsUgcOutlinedIcon from "@mui/icons-material/MapsUgcOutlined";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import LockIcon from "@mui/icons-material/Lock";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
+function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser, socket }) {
   const [open, setOpen] = useState(false);
   const [newRoomInput, setNewRoomInput] = useState("");
 
   const [joinRoomDialog, setJoinRoomDialog] = useState(false);
   const [joinRoomInput, setJoinRoomInput] = useState("");
+
+  const [snack, setSnack] = useState({ msg: "", value: false });
+
+  const navigate = useNavigate();
 
   const handleCloseDialog = () => {
     setOpen(false);
@@ -43,7 +51,7 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
   const handleRoomCreation = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/rooms",
+        "/api/rooms",
         {
           roomName: newRoomInput,
         },
@@ -52,8 +60,14 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
         }
       );
 
+      socket.emit("joinNewRoom", response.data._id);
       setRooms([response.data, ...rooms]);
       handleCloseDialog();
+
+      setSnack({
+        msg: `share this roomId with others to let them join "${response.data.name}" room,  ${response.data._id}`,
+        value: true,
+      });
     } catch (err) {
       alert("Failed Room Creation");
     }
@@ -62,7 +76,7 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
   const handleJoinRoom = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/join-room",
+        "/api/join-room",
         {
           roomId: joinRoomInput,
         },
@@ -71,6 +85,7 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
         }
       );
 
+      socket.emit("joinNewRoom", response.data.room._id);
       setUser(response.data.updatedUser);
       setRooms([response.data.room, ...rooms]);
       handleCloseJoinDialog();
@@ -78,6 +93,22 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
       alert(err);
     }
   };
+
+  const handleLogout = () => {
+    try {
+      axios.get("/api/logout", {
+        withCredentials: true,
+      });
+
+      navigate("/home");
+    } catch (err) {
+      alert(err);
+    }
+  };
+
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
   return (
     <div className="sidebar">
@@ -95,6 +126,9 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
           </IconButton>
           <IconButton>
             <MoreVertIcon />
+          </IconButton>
+          <IconButton onClick={handleLogout}>
+            <LockIcon /> Logout
           </IconButton>
         </div>
       </div>
@@ -200,6 +234,16 @@ function Sidebar({ rooms, setRooms, handleSidebarChatClick, setUser }) {
             />
           );
         })}
+
+        <Snackbar
+          open={snack.value}
+          autoHideDuration={20000}
+          onClose={() => setSnack(false)}
+        >
+          <Alert severity="success" sx={{ width: "100%" }}>
+            {snack.msg}
+          </Alert>
+        </Snackbar>
 
         {/* <SidebarChat />
         <SidebarChat />
