@@ -26,7 +26,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "frontend", "build")));
+app.use(express.static(path.join(__dirname, "frontend", "buildc")));
 
 const server = http.createServer(app);
 
@@ -128,7 +128,7 @@ app.use(routes);
 
 app.get("*", (req, res) => {
   res.sendFile(
-    path.join(__dirname, "/frontend/build/index.html"),
+    path.join(__dirname, "/frontend/buildc/index.html"),
     function (err) {
       res.status(500).send(err);
     }
